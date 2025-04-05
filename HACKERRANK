@@ -1,0 +1,37 @@
+-----to find consective number of days working projects------
+WITH NumberedTasks AS (
+    SELECT
+        Task_ID,
+        Start_Date,
+        End_Date,
+        ROW_NUMBER() OVER (ORDER BY Start_Date) AS RowNum
+    FROM Projects
+),
+TaskGroups AS (
+    SELECT
+        nt1.Task_ID,
+        nt1.Start_Date,
+        nt1.End_Date,
+        SUM(CASE
+            WHEN nt2.Task_ID IS NULL THEN 1
+            ELSE 0 END) OVER (ORDER BY nt1.RowNum) AS GroupID
+    FROM NumberedTasks nt1
+    LEFT JOIN NumberedTasks nt2
+        ON nt1.RowNum = nt2.RowNum + 1
+        AND nt1.Start_Date = nt2.End_Date
+)
+SELECT
+    MIN(Start_Date) AS Project_Start_Date,
+    MAX(End_Date) AS Project_End_Date
+FROM TaskGroups
+GROUP BY GroupID
+ORDER BY DATEDIFF(MAX(End_Date), MIN(Start_Date)) ASC, MIN(Start_Date) ASC;
+-----------    --------- ---- --- --------
+select s.name
+from students s
+ join friends f on s.id = f.id 
+ join packages p on s.id = p.id
+ join packages fp on f.friend_id = fp.id
+ where fp.salary>p.salary
+ order by fp.salary;
+zz
